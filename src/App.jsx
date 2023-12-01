@@ -23,6 +23,7 @@ function App() {
           .then((response) => response.json())
           .then((data) => {
             setData(data.records.map((record) => record.fields))
+            console.log(data.records.map((record) => record.fields))
           })
       } catch (error) {
         console.error("Error fetching JSON:", error)
@@ -45,15 +46,9 @@ function App() {
       <input className="searchbar" type="text" />
       <div className="Cards-Box">
         <div className="Group-All-Cards">
-          <Card />
-          <Card />
-          <Card />
-          <Card />
-          <Card />
-          <Card />
-          <Card />
-          <Card />
-          <Card />
+          {data.map((item, index) => (
+            <Card key={index} data={item} />
+          ))}
         </div>
       </div>
     </div>
