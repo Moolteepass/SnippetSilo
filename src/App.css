@@ -1,0 +1,252 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap");
+
+/* Simple CSS Reset */
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol,
+ul {
+  list-style: none;
+}
+blockquote,
+q {
+  quotes: none;
+}
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: "";
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* _____________ */
+/* Begin App CSS */
+/* _____________ */
+
+:root {
+  /* Variables */
+  --primary-font: "Montserrat", sans-serif;
+  --primary-font-color: rgb(230, 230, 230);
+  --primary-background-color: #1c1c27;
+  --secondary-background-color: #262636;
+
+  /* Root Settings */
+  background-color: var(--primary-background-color);
+}
+
+body,
+h1,
+h2,
+p {
+  font-family: var(--primary-font);
+  color: var(--primary-font-color);
+}
+
+.Cards-Box {
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+.Group-All-Cards {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  flex-flow: wrap;
+}
+
+/* Card CSS */
+.Group-Container {
+  width: 300px;
+  height: auto;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--secondary-background-color);
+  transition: transform 0.3s ease;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 20px;
+}
+
+.Group-Container:hover {
+  transform: scale(1.1);
+}
+
+.Ind-Title {
+  display: flex;
+  font-size: large;
+  color: var(--primary-font-color);
+}
+
+.Ind-Copy-And-Open {
+  display: flex;
+}
+
+.Ind-Copy-And-Open button {
+  border-radius: 10px;
+  border: none;
+  height: 30px;
+  width: 80px;
+  margin-right: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color: var(--primary-background-color);
+  color: var(--primary-font-color);
+  font-family: var(--primary-font);
+  transition: transform 0.3s ease;
+}
+
+.Ind-Copy-And-Open button:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+  color: rgb(88, 85, 243);
+}
+
+.Ind-Copy-And-Open button:onc .Ind-Copy-And-Open {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.Ind-Text-Spacing {
+  margin-left: 10px;
+  margin-top: 5px;
+}
+
+.Ind-Tags {
+  font-size: small;
+  margin-top: 4px;
+}
+
+.Group-Container img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  filter: grayscale(30%);
+  transition: filter 0.3s ease;
+}
+
+.Group-Container:hover img {
+  filter: grayscale(0%);
+}
+
+/* Media query for mobile screens */
+@media (max-width: 767px) {
+  .Group-All-Cards {
+    flex-direction: column; /* Stack items vertically on smaller screens */
+    align-items: center;
+  }
+
+  .Group-Container {
+    width: 90%;
+    min-width: 150px;
+    margin-bottom: 15px;
+  }
+}
