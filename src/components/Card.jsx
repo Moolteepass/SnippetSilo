@@ -1,11 +1,11 @@
 import PropTypes from "prop-types"
 
 function Card({ data }) {
-  const { Title, URL, Tags, Image } = data
+  const { Title, URL, Tags } = data
   return (
     <div className="Group-Container">
       <div className="Ind-Image-Container">
-        <img className="Ind-Image" src={Image} alt={Title} />
+        <img className="Ind-Image" src={data.Image[0].url} alt={Title} />
       </div>
       <div className="Ind-Text-Spacing">
         <h2 className="Ind-Title">{Title}</h2>
