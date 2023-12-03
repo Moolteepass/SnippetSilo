@@ -1,24 +1,42 @@
-import PropTypes from "prop-types"
+import React, { useState } from 'react';
+import PropTypes from "prop-types";
 
 function Card({ data }) {
-  const { Title, URL, Tags } = data
+  const { Title, URL, Tags } = data;
+  const [copyButtonText, setCopyButtonText] = useState("Copy");
+
+  const copyTextToClipboard = async (Title, URL) => {
+    try {
+      await navigator.clipboard.writeText(`${Title}:  ${URL}`);
+      setCopyButtonText("Copied"); // Change button text to "Copied"
+      console.log("Text copied to clipboard");
+
+      // Set the button text back to "Copy" after 2 seconds
+      setTimeout(() => setCopyButtonText("Copy"), 1000);
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+    }
+  };
+
   return (
     <div className="Group-Container">
-      <div className="Ind-Image-Container">
-        <img className="Ind-Image" src={data.Image[0].url} alt={Title} />
-      </div>
-      <div className="Ind-Text-Spacing">
-        <h2 className="Ind-Title">{Title}</h2>
-        <p className="Ind-Tags">{Tags}</p>
-        <div className="Ind-Copy-And-Open">
-          <button className="Ind-Copy" src={URL}>
-            Copy
-          </button>
-          <button className="Ind-Open">Open</button>
+      <div className="Content-Wrapper">
+        <div className="Ind-Image-Container">
+          <img className="Ind-Image" src={data.Image[0].url} alt={Title} />
+        </div>
+        <div className="Ind-Text-Spacing">
+          <h2 className="Ind-Title">{Title}</h2>
+          <p className="Ind-Tags">{Tags.join(", ")}</p>
         </div>
       </div>
+      <div className="Ind-Copy-And-Open">
+        <button className="Ind-Copy" onClick={() => copyTextToClipboard(Title, URL)}>
+          {copyButtonText}
+        </button>
+        <button className="Ind-Open" onClick={() => window.open(URL, '_blank')}>Open</button>
+      </div>
     </div>
-  )
+  );
 }
 
 Card.propTypes = {

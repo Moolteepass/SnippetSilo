@@ -32,15 +32,6 @@ function App() {
     fetchData()
   }, [])
 
-  const copyTextToClipboard = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      console.log("Text copied to clipboard")
-    } catch (err) {
-      console.error("Failed to copy: ", err)
-    }
-  }
-
   return (
     <div>
       <input className="searchbar" type="text" />

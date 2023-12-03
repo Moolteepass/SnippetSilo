@@ -164,17 +164,15 @@ p {
 /* Card CSS */
 .Group-Container {
   width: 300px;
-  height: auto;
+  height: 315px;
   border-radius: 10px;
-  align-self: flex-start;
   display: flex;
   flex-direction: column;
+  justify-content: space-between; /* Aligns content and buttons */
   overflow: hidden;
   background-color: var(--secondary-background-color);
   transition: transform 0.3s ease;
-  margin-left: 10px;
-  margin-right: 10px;
-  margin-bottom: 20px;
+  margin: 10px;
 }
 
 .Group-Container:hover {
@@ -182,13 +180,18 @@ p {
 }
 
 .Ind-Title {
-  display: flex;
-  font-size: large;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Change this to the number of lines you want */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--primary-font-color);
+  font-size: large;
 }
 
 .Ind-Copy-And-Open {
   display: flex;
+  justify-content: center;
 }
 
 .Ind-Copy-And-Open button {
@@ -211,6 +214,8 @@ p {
   color: rgb(88, 85, 243);
 }
 
+.Ind-Copy-And-Open button:onc
+
 .Ind-Copy-And-Open button:onc .Ind-Copy-And-Open {
   display: flex;
   justify-content: space-evenly;
@@ -223,14 +228,16 @@ p {
 
 .Ind-Tags {
   font-size: small;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 .Group-Container img {
   width: 100%;
-  height: auto;
+  height: 200px;
+  object-fit: cover;
+  object-position: center;
   border-radius: 10px;
-  filter: grayscale(30%);
+  filter: grayscale(50%);
   transition: filter 0.3s ease;
 }
 
