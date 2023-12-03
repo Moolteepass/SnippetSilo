@@ -149,6 +149,22 @@ p {
   color: var(--primary-font-color);
 }
 
+.Searchbar-Container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px; /* Add some space at the top */
+}
+
+.searchbar {
+  height: 35px;
+  width: 200px;
+  border-radius: 15px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-family: var(--primary-font);
+  outline: none;
+}
+
 .Cards-Box {
   margin-left: 30px;
   margin-right: 30px;
@@ -214,9 +230,7 @@ p {
   color: rgb(88, 85, 243);
 }
 
-.Ind-Copy-And-Open button:onc
-
-.Ind-Copy-And-Open button:onc .Ind-Copy-And-Open {
+.Ind-Copy-And-Open button:onc .Ind-Copy-And-Open button:onc .Ind-Copy-And-Open {
   display: flex;
   justify-content: space-evenly;
 }
