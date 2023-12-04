@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "./App.css";
 import Card from "./components/Card.jsx";
 
@@ -7,58 +7,88 @@ function App() {
   const [tags, setTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(true); // Added loading state
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = useCallback(async (offset = null, accumulatedData = []) => {
+    try {
+      const baseID = "appOOlZ2AISbHpbVb";
+      const tableName = "All Clips";
+      let url = `https://api.airtable.com/v0/${baseID}/${tableName}`;
+
+      if (offset) {
+        url += `?offset=${offset}`;
+      }
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization:
+            "Bearer patGrTqLMArSkLwSf.28b21052d73212484e726c2573b482facab396c5f5dc83919af2e484611cc6b4",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const result = await response.json();
+      accumulatedData = accumulatedData.concat(result.records);
+
+      if (result.offset) {
+        await fetchData(result.offset, accumulatedData); // Recursively fetch next set of data
+      } else {
+        processFinalData(accumulatedData); // Process data after fetching all pages
+      }
+    } catch (error) {
+      console.error("Error fetching JSON:", error);
+    }
+  }, []); // Empty dependency array
+
+  const processFinalData = (allData) => {
+    // Sort the data by 'Created Date' in descending order
+    allData.sort((a, b) => {
+      const timestampA = new Date(a.fields["Created Date"]);
+      const timestampB = new Date(b.fields["Created Date"]);
+      return timestampB - timestampA;
+    });
+
+    const processedData = allData.map((record) => record.fields);
+
+    // Log the processed data to the console
+    console.log(processedData);
+
+    setData(processedData);
+    localStorage.setItem("bookmarksData", JSON.stringify(processedData)); // Cache data
+
+    const allTags = allData
+      .flatMap((record) => record.fields.Tags || [])
+      .filter((value, index, self) => self.indexOf(value) === index); // Removing duplicates
+
+    setTags(allTags);
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    let accumulatedData = []; // Array to accumulate data across pages
-  
-    const fetchData = async (offset = null) => {
-      try {
-        const baseID = "appOOlZ2AISbHpbVb";
-        const tableName = "All Clips";
-        let url = `https://api.airtable.com/v0/${baseID}/${tableName}`;
-  
-        if (offset) {
-          url += `?offset=${offset}`;
-        }
-  
-        const response = await fetch(url, {
-          headers: {
-            Authorization: "Bearer patGrTqLMArSkLwSf.28b21052d73212484e726c2573b482facab396c5f5dc83919af2e484611cc6b4",
-          },
-        });
-  
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-  
-        const result = await response.json();
-        accumulatedData = accumulatedData.concat(result.records);
-  
-        if (result.offset) {
-          await fetchData(result.offset); // Recursively fetch next set of data
-        } else {
-          processFinalData(accumulatedData); // Process data after fetching all pages
-        }
-      } catch (error) {
-        console.error("Error fetching JSON:", error);
-      }
-    };
-  
-    const processFinalData = (allData) => {
-      setData(allData.map(record => record.fields));
-  
-      const allTags = allData
-        .flatMap(record => record.fields.Tags || [])
-        .filter((value, index, self) => self.indexOf(value) === index); // Removing duplicates
-  
+    const cachedData = localStorage.getItem("bookmarksData");
+    if (cachedData) {
+      const parsedData = JSON.parse(cachedData);
+      setData(parsedData);
+
+      const allTags = parsedData
+        .flatMap((item) => item.Tags || [])
+        .filter((value, index, self) => self.indexOf(value) === index); // Extract tags from cached data
       setTags(allTags);
-      setIsLoading(false); // Data fetching and processing complete
-    };
-  
-    setIsLoading(true); // Start loading
+
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
+      fetchData();
+    }
+  }, [fetchData]);
+
+  const handleRefresh = () => {
+    setIsLoading(true);
     fetchData();
-  }, []);
+  };
 
   const handleTagChange = (tag) => {
     setSelectedTags((prevSelectedTags) =>
@@ -74,11 +104,9 @@ function App() {
 
   const filteredData = data
     .filter((item) => {
-      // Filter by search query
       return item.Title.toLowerCase().includes(searchQuery.toLowerCase());
     })
     .filter((item) => {
-      // Filter by selected tags, if any
       if (selectedTags.length === 0) {
         return true;
       }
@@ -94,15 +122,17 @@ function App() {
           placeholder="Search..."
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+        <button onClick={handleRefresh} className="Refresh-Button">
+          Refresh Data
+        </button>
         <span className="record-count">
           {`Displaying ${filteredData.length} records`}
         </span>
       </div>
 
-      {/* Buttons for Tags */}
       <div className="Tags-Container">
         {isLoading ? (
-          <div>Loading...</div> // Display loading message
+          <div>Loading...</div>
         ) : (
           tags.map((tag, index) => (
             <button
@@ -120,7 +150,7 @@ function App() {
 
       <div className="Cards-Box">
         {isLoading ? (
-          <div>Loading cards...</div> // Optional: Display loading message for cards
+          <div>Loading cards...</div>
         ) : (
           <div className="Group-All-Cards">
             {filteredData.map((item, index) => (

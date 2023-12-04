@@ -149,6 +149,15 @@ p {
   color: var(--primary-font-color);
 }
 
+.Refresh-Button {
+  font-family: var(--primary-font);
+  border-radius: 15px;
+  outline: none;
+  border: none;
+  margin-left: 10px;
+  height: 35px
+}
+
 .Searchbar-Container {
   display: flex;
   justify-content: center;
@@ -306,5 +315,16 @@ p {
     width: 90%;
     min-width: 150px;
     margin-bottom: 15px;
+  }
+
+  .Searchbar-Container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .record-count {
+    margin-top: 10px;
   }
 }
