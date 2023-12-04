@@ -4,6 +4,8 @@ import Card from "./components/Card.jsx";
 
 function App() {
   const [data, setData] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -40,6 +42,12 @@ function App() {
           );
         });
 
+        // Extract and update tags
+        const fetchedTags = result.records
+          .flatMap((record) => record.fields.Tags || [])
+          .filter((value, index, self) => self.indexOf(value) === index);
+        setTags(fetchedTags);
+
         if (result.offset) {
           fetchData(result.offset); // Recursively fetch next set of data
         }
@@ -50,9 +58,26 @@ function App() {
     fetchData();
   }, []);
 
-  const filteredData = data.filter((item) =>
-    item.Title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleTagChange = (tag) => {
+    setSelectedTags((prevSelectedTags) =>
+      prevSelectedTags.includes(tag)
+        ? prevSelectedTags.filter((t) => t !== tag)
+        : [...prevSelectedTags, tag]
+    );
+  };
+
+  const filteredData = data
+    .filter((item) => {
+      // Filter by search query
+      return item.Title.toLowerCase().includes(searchQuery.toLowerCase());
+    })
+    .filter((item) => {
+      // Filter by selected tags, if any
+      if (selectedTags.length === 0) {
+        return true;
+      }
+      return selectedTags.every((tag) => item.Tags?.includes(tag));
+    });
 
   return (
     <div className="Main-App">
@@ -67,6 +92,24 @@ function App() {
           {`Displaying ${filteredData.length} records`}
         </span>
       </div>
+
+      {/* Checkboxes for Tags */}
+      <div className="Tags-Container">
+        {tags.map((tag, index) => (
+          <label key={index}>
+            <input
+              type="checkbox"
+              name="tag"
+              value={tag}
+              onChange={() => handleTagChange(tag)}
+              checked={selectedTags.includes(tag)}
+              className="Tags-Checkbox"
+            />
+            {tag}
+          </label>
+        ))}
+      </div>
+
       <div className="Cards-Box">
         <div className="Group-All-Cards">
           {filteredData.map((item, index) => (

@@ -171,6 +171,18 @@ p {
   margin-left: 20px;
 }
 
+.Tags-Container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 90%;
+  justify-content: center;
+  font-size: large;
+}
+
+.Tags-Container label {
+  padding: 5px;
+}
+
 .Cards-Box {
   margin-left: 30px;
   margin-right: 30px;
