@@ -22,7 +22,7 @@ function Card({ data }) {
     <div className="Group-Container">
       <div className="Content-Wrapper">
         <div className="Ind-Image-Container">
-          <img className="Ind-Image" src={data.Image[0].url} loading="lazy" alt={Title} />
+          <img className="Ind-Image" src={data.Image[0].url} loading="lazy" alt={Title} onClick={() => window.open(URL, '_blank')} />
         </div>
         <div className="Ind-Text-Spacing">
           <h2 className="Ind-Title">{Title}</h2>
