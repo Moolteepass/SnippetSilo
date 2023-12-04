@@ -30,24 +30,14 @@ function App() {
 
         const result = await response.json();
         setData((currentData) => {
-          // Create a new set of IDs from the current data
-          const currentIds = new Set(currentData.map(item => item.id));
-
-          // Filter out any records that already exist in currentData
+          const currentIds = new Set(currentData.map((item) => item.ID));
           const uniqueNewData = result.records
-            .map(record => record.fields)
-            .filter(record => !currentIds.has(record.id));
+            .map((record) => record.fields)
+            .filter((record) => !currentIds.has(record.ID));
 
-          // Sort by newest 'Created Date' and concatenate with existing data
-          const updatedData = [
-            ...currentData,
-            ...uniqueNewData
-          ].sort((a, b) => new Date(b['Created Date']) - new Date(a['Created Date']));
-
-          if (!result.offset) {
-            console.log("Finished fetching data:", updatedData);
-          }
-          return updatedData;
+          return [...currentData, ...uniqueNewData].sort(
+            (a, b) => new Date(b["Created Date"]) - new Date(a["Created Date"])
+          );
         });
 
         if (result.offset) {
@@ -60,8 +50,8 @@ function App() {
     fetchData();
   }, []);
 
-  const filteredData = data.filter(
-    (item) => item.Title.toLowerCase().includes(searchQuery.toLowerCase()) // Assuming you want to filter by 'Title'
+  const filteredData = data.filter((item) =>
+    item.Title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -73,6 +63,9 @@ function App() {
           placeholder="Search..."
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+        <span className="record-count">
+          {`Displaying ${filteredData.length} records`}
+        </span>
       </div>
       <div className="Cards-Box">
         <div className="Group-All-Cards">
