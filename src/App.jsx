@@ -66,6 +66,10 @@ function App() {
     );
   };
 
+  const handleTagButtonClick = (tag) => {
+    handleTagChange(tag); // Reuse the existing handleTagChange function
+  };
+
   const filteredData = data
     .filter((item) => {
       // Filter by search query
@@ -93,20 +97,16 @@ function App() {
         </span>
       </div>
 
-      {/* Checkboxes for Tags */}
+      {/* Buttons for Tags */}
       <div className="Tags-Container">
         {tags.map((tag, index) => (
-          <label key={index}>
-            <input
-              type="checkbox"
-              name="tag"
-              value={tag}
-              onChange={() => handleTagChange(tag)}
-              checked={selectedTags.includes(tag)}
-              className="Tags-Checkbox"
-            />
+          <button
+            key={index}
+            onClick={() => handleTagButtonClick(tag)}
+            className={`Tags-Button ${selectedTags.includes(tag) ? 'selected' : ''}`}
+          >
             {tag}
-          </label>
+          </button>
         ))}
       </div>
 
