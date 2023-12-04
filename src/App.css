@@ -163,6 +163,7 @@ p {
   padding-right: 10px;
   font-family: var(--primary-font);
   outline: none;
+  border: none;
 }
 
 .record-count {
