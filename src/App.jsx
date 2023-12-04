@@ -7,54 +7,56 @@ function App() {
   const [tags, setTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true); // Added loading state
 
   useEffect(() => {
+    let accumulatedData = []; // Array to accumulate data across pages
+  
     const fetchData = async (offset = null) => {
       try {
         const baseID = "appOOlZ2AISbHpbVb";
         const tableName = "All Clips";
         let url = `https://api.airtable.com/v0/${baseID}/${tableName}`;
-
+  
         if (offset) {
           url += `?offset=${offset}`;
         }
-
+  
         const response = await fetch(url, {
           headers: {
-            Authorization:
-              "Bearer patGrTqLMArSkLwSf.28b21052d73212484e726c2573b482facab396c5f5dc83919af2e484611cc6b4",
+            Authorization: "Bearer patGrTqLMArSkLwSf.28b21052d73212484e726c2573b482facab396c5f5dc83919af2e484611cc6b4",
           },
         });
-
+  
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-
+  
         const result = await response.json();
-        setData((currentData) => {
-          const currentIds = new Set(currentData.map((item) => item.ID));
-          const uniqueNewData = result.records
-            .map((record) => record.fields)
-            .filter((record) => !currentIds.has(record.ID));
-
-          return [...currentData, ...uniqueNewData].sort(
-            (a, b) => new Date(b["Created Date"]) - new Date(a["Created Date"])
-          );
-        });
-
-        // Extract and update tags
-        const fetchedTags = result.records
-          .flatMap((record) => record.fields.Tags || [])
-          .filter((value, index, self) => self.indexOf(value) === index);
-        setTags(fetchedTags);
-
+        accumulatedData = accumulatedData.concat(result.records);
+  
         if (result.offset) {
-          fetchData(result.offset); // Recursively fetch next set of data
+          await fetchData(result.offset); // Recursively fetch next set of data
+        } else {
+          processFinalData(accumulatedData); // Process data after fetching all pages
         }
       } catch (error) {
         console.error("Error fetching JSON:", error);
       }
     };
+  
+    const processFinalData = (allData) => {
+      setData(allData.map(record => record.fields));
+  
+      const allTags = allData
+        .flatMap(record => record.fields.Tags || [])
+        .filter((value, index, self) => self.indexOf(value) === index); // Removing duplicates
+  
+      setTags(allTags);
+      setIsLoading(false); // Data fetching and processing complete
+    };
+  
+    setIsLoading(true); // Start loading
     fetchData();
   }, []);
 
@@ -99,23 +101,33 @@ function App() {
 
       {/* Buttons for Tags */}
       <div className="Tags-Container">
-        {tags.map((tag, index) => (
-          <button
-            key={index}
-            onClick={() => handleTagButtonClick(tag)}
-            className={`Tags-Button ${selectedTags.includes(tag) ? 'selected' : ''}`}
-          >
-            {tag}
-          </button>
-        ))}
+        {isLoading ? (
+          <div>Loading...</div> // Display loading message
+        ) : (
+          tags.map((tag, index) => (
+            <button
+              key={index}
+              onClick={() => handleTagButtonClick(tag)}
+              className={`Tags-Button ${
+                selectedTags.includes(tag) ? "selected" : ""
+              }`}
+            >
+              {tag}
+            </button>
+          ))
+        )}
       </div>
 
       <div className="Cards-Box">
-        <div className="Group-All-Cards">
-          {filteredData.map((item, index) => (
-            <Card key={index} data={item} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div>Loading cards...</div> // Optional: Display loading message for cards
+        ) : (
+          <div className="Group-All-Cards">
+            {filteredData.map((item, index) => (
+              <Card key={index} data={item} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
