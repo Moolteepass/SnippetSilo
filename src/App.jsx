@@ -85,6 +85,15 @@ function App() {
     }
   }, [fetchData]);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      console.log("Clearing cache"); // Log when clearing cache
+      localStorage.removeItem("bookmarksData");
+    }, 1200000); // 1200000 milliseconds = 20 minutes
+
+    return () => clearInterval(intervalId); // Clear interval on component unmount
+  }, []);
+
   const handleRefresh = () => {
     setIsLoading(true);
     fetchData();
