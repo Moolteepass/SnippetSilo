@@ -34,34 +34,34 @@ function App() {
       accumulatedData = accumulatedData.concat(result.records);
 
       if (result.offset) {
-        await fetchData(result.offset, accumulatedData); // Recursively fetch next set of data
+        await fetchData(result.offset, accumulatedData);
       } else {
-        processFinalData(accumulatedData); // Process data after fetching all pages
+        processFinalData(accumulatedData);
       }
     } catch (error) {
       console.error("Error fetching JSON:", error);
     }
-  }, []); // Empty dependency array
+  }, []);
 
   const processFinalData = (allData) => {
-    // Sort the data by 'Created Date' in descending order
     allData.sort((a, b) => {
       const timestampA = new Date(a.fields["Created Date"]);
       const timestampB = new Date(b.fields["Created Date"]);
       return timestampB - timestampA;
     });
 
-    const processedData = allData.map((record) => record.fields);
-
-    // Log the processed data to the console
-    console.log(processedData);
+    const processedData = allData.map((record) => ({
+      ...record.fields,
+      imageUrl: record.fields.Image?.[0]?.url,
+    }));
 
     setData(processedData);
-    localStorage.setItem("bookmarksData", JSON.stringify(processedData)); // Cache data
+    localStorage.setItem("bookmarksData", JSON.stringify(processedData));
+    console.log(processedData);
 
     const allTags = allData
       .flatMap((record) => record.fields.Tags || [])
-      .filter((value, index, self) => self.indexOf(value) === index); // Removing duplicates
+      .filter((value, index, self) => self.indexOf(value) === index);
 
     setTags(allTags);
     setIsLoading(false);
@@ -72,12 +72,10 @@ function App() {
     if (cachedData) {
       const parsedData = JSON.parse(cachedData);
       setData(parsedData);
-
       const allTags = parsedData
         .flatMap((item) => item.Tags || [])
-        .filter((value, index, self) => self.indexOf(value) === index); // Extract tags from cached data
+        .filter((value, index, self) => self.indexOf(value) === index);
       setTags(allTags);
-
       setIsLoading(false);
     } else {
       setIsLoading(true);
@@ -87,11 +85,11 @@ function App() {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      console.log("Clearing cache"); // Log when clearing cache
       localStorage.removeItem("bookmarksData");
-    }, 1200000); // 1200000 milliseconds = 20 minutes
+      console.log("cleared");
+    }, 600000); // 10 minutes
 
-    return () => clearInterval(intervalId); // Clear interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleRefresh = () => {
@@ -108,17 +106,15 @@ function App() {
   };
 
   const handleTagButtonClick = (tag) => {
-    handleTagChange(tag); // Reuse the existing handleTagChange function
+    handleTagChange(tag);
   };
 
   const filteredData = data
+    .filter((item) =>
+      item.Title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     .filter((item) => {
-      return item.Title.toLowerCase().includes(searchQuery.toLowerCase());
-    })
-    .filter((item) => {
-      if (selectedTags.length === 0) {
-        return true;
-      }
+      if (selectedTags.length === 0) return true;
       return selectedTags.every((tag) => item.Tags?.includes(tag));
     });
 
