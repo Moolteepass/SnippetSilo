@@ -1,171 +1,144 @@
-import { useState, useEffect, useCallback } from "react";
-import "./App.css";
-import Card from "./components/Card.jsx";
+import { useState, useEffect } from "react"
+import "./App.css"
+import Card from "./components/Card"
 
 function App() {
-  const [data, setData] = useState([]);
-  const [tags, setTags] = useState([]);
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  /* Initial variables */
+  const [data, setData] = useState([])
+  const [search, setSearch] = useState("")
+  const [tags, setTags] = useState([])
+  const [selectedTag, setSelectedTag] = useState([])
 
-  const fetchData = useCallback(async (offset = null, accumulatedData = []) => {
-    try {
-      const baseID = "appOOlZ2AISbHpbVb";
-      const tableName = "All Clips";
-      let url = `https://api.airtable.com/v0/${baseID}/${tableName}`;
+  useEffect(() => {
+    /* Fetch Variables */
+    const baseID = "appOOlZ2AISbHpbVb"
+    const tableName = "All Clips"
+    const AIRTABLE_API_KEY =
+      "patGrTqLMArSkLwSf.28b21052d73212484e726c2573b482facab396c5f5dc83919af2e484611cc6b4"
+
+    /* Function to recursively fetch all records */
+    const fetchAllRecords = (offset, allRecords = []) => {
+      let fetchURL = `https://api.airtable.com/v0/${baseID}/${tableName}`
 
       if (offset) {
-        url += `?offset=${offset}`;
+        fetchURL += `?offset=${offset}`
       }
 
-      const response = await fetch(url, {
+      fetch(fetchURL, {
+        method: "GET",
         headers: {
-          Authorization:
-            "Bearer patGrTqLMArSkLwSf.28b21052d73212484e726c2573b482facab396c5f5dc83919af2e484611cc6b4",
+          Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+          "Content-Type": "application/json",
         },
-      });
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          const newRecords = allRecords.concat(data.records)
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
+          if (data.offset) {
+            // If there's an offset, more records are available, so fetch them
+            fetchAllRecords(data.offset, newRecords)
+          } else {
+            // No more records, process data
+            processData(newRecords)
+          }
+        })
+    }
 
-      const result = await response.json();
-      accumulatedData = accumulatedData.concat(result.records);
+    /* Function to process data and sort tags */
+    const processData = (records) => {
+      console.log("Original data: ", records) // Log original data
 
-      if (result.offset) {
-        await fetchData(result.offset, accumulatedData);
+      // Sort records by ID
+      records.sort((a, b) => b.fields.ID - a.fields.ID)
+
+      const processedData = records.map((item) => ({
+        id: item.fields.ID,
+        created: item.fields["Created Date"],
+        title: item.fields.Title,
+        image: item.fields.ImageURL,
+        url: item.fields.URL,
+        tags: item.fields.Tags,
+        rating: item.fields.Rating,
+      }))
+
+      console.log("Processed data:", processedData) // Log processed data
+
+      // Extract and sort unique tags from processed data
+      const uniqueTags = Array.from(
+        new Set(processedData.flatMap((item) => item.tags || []))
+      ).sort()
+      setTags(uniqueTags)
+      console.log("Unique tags: ", uniqueTags)
+
+      // Set your state with processed data
+      setData(processedData)
+    }
+
+    // Initial call to start fetching records
+    fetchAllRecords()
+  }, [])
+
+  const handleSearchChange = (event) => {
+    setSearch(event.target.value)
+  }
+
+  const filteredData = data.filter((item) => {
+    // Check if item title matches the search
+    const matchesSearch = item.title
+      .toLowerCase()
+      .includes(search.toLowerCase())
+
+    /// Check if all selected tags are present in the item's tags
+    const matchesTags =
+      selectedTag.length === 0 ||
+      selectedTag.every((tag) => item.tags.includes(tag))
+
+    return matchesSearch && matchesTags
+  })
+
+  const handleTagClick = (tag) => {
+    setSelectedTag((prevSelectedTags) => {
+      if (prevSelectedTags.includes(tag)) {
+        // If tag is already selected, remove it
+        return prevSelectedTags.filter((t) => t !== tag)
       } else {
-        processFinalData(accumulatedData);
+        // If tag is not selected, add it
+        return [...prevSelectedTags, tag]
       }
-    } catch (error) {
-      console.error("Error fetching JSON:", error);
-    }
-  }, []);
-
-  const processFinalData = (allData) => {
-    allData.sort((a, b) => {
-      const timestampA = new Date(a.fields["Created Date"]);
-      const timestampB = new Date(b.fields["Created Date"]);
-      return timestampB - timestampA;
-    });
-
-    const processedData = allData.map((record) => ({
-      ...record.fields,
-      imageUrl: record.fields.Image?.[0]?.url,
-    }));
-
-    setData(processedData);
-    localStorage.setItem("bookmarksData", JSON.stringify(processedData));
-    console.log(processedData);
-
-    const allTags = allData
-      .flatMap((record) => record.fields.Tags || [])
-      .filter((value, index, self) => self.indexOf(value) === index);
-
-    setTags(allTags);
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    const cachedData = localStorage.getItem("bookmarksData");
-    if (cachedData) {
-      const parsedData = JSON.parse(cachedData);
-      setData(parsedData);
-      const allTags = parsedData
-        .flatMap((item) => item.Tags || [])
-        .filter((value, index, self) => self.indexOf(value) === index);
-      setTags(allTags);
-      setIsLoading(false);
-    } else {
-      setIsLoading(true);
-      fetchData();
-    }
-  }, [fetchData]);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      localStorage.removeItem("bookmarksData");
-      console.log("cleared");
-    }, 600000); // 10 minutes
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const handleRefresh = () => {
-    setIsLoading(true);
-    fetchData();
-  };
-
-  const handleTagChange = (tag) => {
-    setSelectedTags((prevSelectedTags) =>
-      prevSelectedTags.includes(tag)
-        ? prevSelectedTags.filter((t) => t !== tag)
-        : [...prevSelectedTags, tag]
-    );
-  };
-
-  const handleTagButtonClick = (tag) => {
-    handleTagChange(tag);
-  };
-
-  const filteredData = data
-    .filter((item) =>
-      item.Title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .filter((item) => {
-      if (selectedTags.length === 0) return true;
-      return selectedTags.every((tag) => item.Tags?.includes(tag));
-    });
+    })
+  }
 
   return (
-    <div className="Main-App">
-      <div className="Searchbar-Container">
+    <div className="App">
+      <div className="Header-Container">
         <input
-          className="searchbar"
           type="text"
-          placeholder="Search..."
-          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={`Displaying ${filteredData.length} records`}
+          value={search}
+          onChange={handleSearchChange}
         />
-        <button onClick={handleRefresh} className="Refresh-Button">
-          Refresh Data
-        </button>
-        <span className="record-count">
-          {`Displaying ${filteredData.length} records`}
-        </span>
       </div>
-
-      <div className="Tags-Container">
-        {isLoading ? (
-          <div>Loading...</div>
-        ) : (
-          tags.map((tag, index) => (
-            <button
-              key={index}
-              onClick={() => handleTagButtonClick(tag)}
-              className={`Tags-Button ${
-                selectedTags.includes(tag) ? "selected" : ""
-              }`}
-            >
-              {tag}
-            </button>
-          ))
-        )}
+      <div className="Grouped-Tags-Container">
+        {tags.map((tag) => (
+          <span
+            key={tag}
+            className={
+              selectedTag.includes(tag) ? "Highlighted-Tags" : "Grouped-Tags"
+            }
+            onClick={() => handleTagClick(tag)}
+          >
+            {tag}
+          </span>
+        ))}
       </div>
-
-      <div className="Cards-Box">
-        {isLoading ? (
-          <div>Loading cards...</div>
-        ) : (
-          <div className="Group-All-Cards">
-            {filteredData.map((item, index) => (
-              <Card key={index} data={item} />
-            ))}
-          </div>
-        )}
+      <div className="Card-Container">
+        {filteredData.map((item) => {
+          return <Card key={item.id} data={item} />
+        })}
       </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
