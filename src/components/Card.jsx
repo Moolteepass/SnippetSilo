@@ -4,7 +4,7 @@ import { IoCopy, IoCopyOutline } from "react-icons/io5"
 import PropTypes from "prop-types"
 
 const Card = ({ data }) => {
-  const { title, url, created, image, tags, rating } = data
+  const { title, url, image, tags } = data
   const [copyIcon, SetCopyIcon] = useState(<IoCopy />)
 
   const copyToClipboard = async (title, url) => {
