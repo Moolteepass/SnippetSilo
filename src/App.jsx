@@ -69,7 +69,7 @@ function App() {
       <div className="Header-Container">
         <input
           type="text"
-          placeholder={`(Version 2.0) ${filteredData.length} records`}
+          placeholder={`(Version 2.2) ${filteredData.length} records`}
           value={search}
           onChange={handleSearchChange} // Use the handleSearchChange here
         />

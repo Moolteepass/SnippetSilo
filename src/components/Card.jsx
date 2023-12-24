@@ -14,7 +14,7 @@ const Card = ({ data }) => {
 
     setTimeout(() => {
       SetCopyIcon(<IoCopy />) // Revert back to copy icon after 2 seconds
-    }, 400)
+    }, 100)
   }
 
   return (

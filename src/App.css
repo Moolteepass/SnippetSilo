@@ -122,8 +122,9 @@ body {
   flex-direction: column;
   width: 300px;
   height: auto;
-  padding: 10px;
-  padding-bottom: 15px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
   position: relative;
 }
 
@@ -139,7 +140,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 20px;
+  border-radius: 15px;
 }
 
 .Ind-Open-Container {
