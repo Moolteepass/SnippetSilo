@@ -8,40 +8,55 @@ function App() {
   const [search, setSearch] = useState("")
 
   useEffect(() => {
-    var base = new Airtable({
-      apiKey:
-        "patGrTqLMArSkLwSf.28b21052d73212484e726c2573b482facab396c5f5dc83919af2e484611cc6b4",
-    }).base("appOOlZ2AISbHpbVb")
+    // Load data from localStorage or fetch it
+    if (localStorage.getItem("cachedData") !== null) {
+      console.log("cachedData exists, loading now")
+      setData(JSON.parse(localStorage.getItem("cachedData")))
+    } else {
+      console.log("cachedData does not exist, fetching now")
+    }
 
-    let allRecords = []
+    const fetchData = async () => {
+      console.log("cachedData does not exist, fetching now")
+      var base = new Airtable({
+        apiKey:
+          "patGrTqLMArSkLwSf.28b21052d73212484e726c2573b482facab396c5f5dc83919af2e484611cc6b4",
+      }).base("appOOlZ2AISbHpbVb")
 
-    base("All Clips")
-      .select({
-        fields: ["Title", "URL", "ImageURL", "Rating", "Tags"],
-        sort: [{ field: "ID", direction: "desc" }],
-      })
-      .eachPage(
-        function page(records, fetchNextPage) {
-          // This function (`page`) will get called for each page of records.
+      let allRecords = []
 
-          records.forEach(function (record) {
-            allRecords.push(record.fields)
-          })
+      base("All Clips")
+        .select({
+          fields: ["Title", "URL", "ImageURL", "Rating", "Tags"],
+          sort: [{ field: "ID", direction: "desc" }],
+        })
+        .eachPage(
+          function page(records, fetchNextPage) {
+            // This function (`page`) will get called for each page of records.
 
-          // To fetch the next page of records, call `fetchNextPage`.
-          // If there are more records, `page` will get called again.
-          // If there are no more records, `done` will get called.
-          fetchNextPage()
-        },
-        function done(err) {
-          if (err) {
-            console.error(err)
-            return
+            records.forEach(function (record) {
+              allRecords.push(record.fields)
+            })
+
+            // To fetch the next page of records, call `fetchNextPage`.
+            // If there are more records, `page` will get called again.
+            // If there are no more records, `done` will get called.
+            fetchNextPage()
+          },
+          function done(err) {
+            if (err) {
+              console.error(err)
+              return
+            }
+            setData(allRecords)
+            localStorage.setItem("cachedData", JSON.stringify(allRecords))
+            console.log("fetchResult", allRecords)
           }
-          setData(allRecords)
-        }
-      )
-  }, [])
+        )
+    }
+
+    fetchData()
+  }, []) // Removed data from dependency array
 
   const handleSearchChange = (event) => {
     setSearch(event.target.value)
@@ -69,7 +84,7 @@ function App() {
       <div className="Header-Container">
         <input
           type="text"
-          placeholder={`(Version 2.2) ${filteredData.length} records`}
+          placeholder={`(Version 2.3) ${filteredData.length} records`}
           value={search}
           onChange={handleSearchChange} // Use the handleSearchChange here
         />
